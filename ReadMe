@@ -1,0 +1,7 @@
+# Instalasi
+Install venv
+Install pytorch torchvision cpu only
+Install ultralytics
+install fast api
+pip install uvicorn
+uvicorn api:app --host 0.0.0.0 --reload
