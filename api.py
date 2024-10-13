@@ -1,20 +1,45 @@
 from fastapi import FastAPI, File, UploadFile
 import shutil
 import os
-from tasks import predict
+from celery_config import celery_app, track_video
+import uuid
 
 app = FastAPI()
 
-UPLOAD_DIR = "/root/ultralytics/ultralytics-object-detection-paddy/files"
+# UPLOAD_DIR = "/root/ultralytics/ultralytics-object-detection-paddy/files"
+UPLOAD_DIR = "/Users/sadewawicak/Project/JagoPadi/ultralytics-object-detection-paddy/files"
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
-    file_location = os.path.join(UPLOAD_DIR, file.filename)
+    
+    unique_filename = f"{uuid.uuid4()}_{file.filename}"
+    file_location = os.path.join(UPLOAD_DIR, unique_filename)
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    # task = predict.delay(file_location)
-    task = add.delay(4, 6)
-    return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+    task = track_video.delay(file_location, unique_filename)
+    # task = add.delay(4, 6)
+    
+    # return {"token": task.id}
+    return {"token": task.id, "filename": unique_filename}
 
-# To run the FastAPI app, use the command: uvicorn main:app --reload
+
+@app.get("/result/{task_id}")
+async def get_result(task_id: str):
+    task_result = celery_app.AsyncResult(task_id)
+    if task_result.state == 'PENDING':
+        return {"task_id": task_id, "status": task_result.state, "result": None}
+    elif task_result.state != 'FAILURE':
+        return {"task_id": task_id, "status": task_result.state, "result": task_result.result}
+    else:
+        # something went wrong in the background job
+        return {"task_id": task_id, "status": task_result.state, "result": str(task_result.info)}
+
+# To run the FastAPI app, use the command: uvicorn api:app --reload
+# celery -A celery_config.celery_app flower
+# celery -A celery_config.celery_app worker --loglevel=info
+# celery -A celery_config.celery_app worker --concurrency=1
+# celery --broker=redis://localhost:6379/0 flower
+# /////
+# celery -A  celery_config.celery_app worker --loglevel=info --concurrency=1
+# celery -A  celery_config.celery_app flower --loglevel=info
