@@ -8,8 +8,10 @@ import cv2
 
 celery_app = Celery(
     'worker',
-    broker='redis://localhost:6379/0',
-    backend='redis://localhost:6379/0'
+    # broker='redis://localhost:6379/0',
+    # backend='redis://localhost:6379/0'
+    broker='redis://localhost:6380/0',
+    backend='redis://localhost:6380/0'
 )
 
 @celery_app.task

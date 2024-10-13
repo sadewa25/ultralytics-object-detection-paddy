@@ -6,8 +6,8 @@ import uuid
 
 app = FastAPI()
 
-# UPLOAD_DIR = "/root/ultralytics/ultralytics-object-detection-paddy/files"
-UPLOAD_DIR = "/Users/sadewawicak/Project/JagoPadi/ultralytics-object-detection-paddy/files"
+UPLOAD_DIR = "/root/ultralytics/ultralytics-object-detection-paddy/files"
+# UPLOAD_DIR = "/Users/sadewawicak/Project/JagoPadi/ultralytics-object-detection-paddy/files"
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
@@ -35,11 +35,11 @@ async def get_result(task_id: str):
         # something went wrong in the background job
         return {"task_id": task_id, "status": task_result.state, "result": str(task_result.info)}
 
-# To run the FastAPI app, use the command: uvicorn api:app --reload
+# To run the FastAPI app, use the command: uvicorn api:app --reload --host 0.0.0.0
 # celery -A celery_config.celery_app flower
 # celery -A celery_config.celery_app worker --loglevel=info
 # celery -A celery_config.celery_app worker --concurrency=1
 # celery --broker=redis://localhost:6379/0 flower
 # /////
 # celery -A  celery_config.celery_app worker --loglevel=info --concurrency=1
-# celery -A  celery_config.celery_app flower --loglevel=info
+# celery -A  celery_config.celery_app flower --host 0.0.0.0 --loglevel=info
