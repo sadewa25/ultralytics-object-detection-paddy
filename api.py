@@ -3,11 +3,14 @@ import shutil
 import os
 from celery_config import celery_app, track_video
 import uuid
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
-UPLOAD_DIR = "/root/ultralytics/ultralytics-object-detection-paddy/files"
-# UPLOAD_DIR = "/Users/sadewawicak/Project/JagoPadi/ultralytics-object-detection-paddy/files"
+app.mount("/results", StaticFiles(directory="results"), name="results")
+
+# UPLOAD_DIR = "/root/ultralytics/ultralytics-object-detection-paddy/files"
+UPLOAD_DIR = "/Users/sadewawicak/Project/JagoPadi/ultralytics-object-detection-paddy/files"
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
@@ -43,3 +46,4 @@ async def get_result(task_id: str):
 # /////
 # celery -A  celery_config.celery_app worker --loglevel=info --concurrency=1
 # celery -A  celery_config.celery_app flower --host 0.0.0.0 --loglevel=info
+# 192.168.1.20:8000/results/c29fac9b-e633-45e9-a942-5270615a3c6e_My Video.mp4.avi
