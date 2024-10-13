@@ -4,4 +4,6 @@ Install pytorch torchvision cpu only
 Install ultralytics
 install fast api
 pip install uvicorn
+pip install celery[redis]
+pip install redis
 uvicorn api:app --host 0.0.0.0 --reload
