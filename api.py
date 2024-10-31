@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
 from celery_config import celery_app, track_video
@@ -11,8 +12,7 @@ app.mount("/results", StaticFiles(directory="results"), name="results")
 
 # Configure CORS
 origins = [
-    "https://jagopadi.com",
-    "https://sidito.my.id",
+    "*"
     # Add other origins as needed
 ]
 
