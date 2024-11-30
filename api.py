@@ -71,6 +71,18 @@ async def get_result(task_id: str):
 # celery -A  celery_config.celery_app worker --loglevel=info --concurrency=1
 # celery -A  celery_config.celery_app flower --host 0.0.0.0 --loglevel=info
 # 192.168.1.20:8000/results/c29fac9b-e633-45e9-a942-5270615a3c6e_My Video.mp4.avi
+
+# nohup uvicorn api:app --reload --host 0.0.0.0 &
+# nohup celery -A celery_config.celery_app worker --loglevel=info --concurrency=1 &
+# nohup celery -A celery_config.celery_app flower --host 0.0.0.0 --loglevel=info &
+
+
+# Delete Process NoHup
+# ps aux | grep celery
+# ps aux | grep uvicorn
+# kill PID
+
+
 # http://103.16.117.163:5555/tasks
 # http://103.16.117.163:8000/results/80ca3475-0cd7-4f1f-81fd-17375e511b1e_My%20Video.mp4.avi
 # track-uvicorn.service
