@@ -1,8 +1,10 @@
 from celery import Celery
 from time import sleep
 # ultralytics
-import ultralytics
 from ultralytics import YOLO
+import tensorflow as tf
+import numpy as np
+from PIL import Image
 
 import cv2
 
@@ -18,6 +20,53 @@ celery_app = Celery(
 def hello(info: str):
     sleep(30)
     return f'hello world: {info}'
+
+@celery_app.task
+def track_img(location: str):
+    img = Image.open(location)
+    img = img.convert("L")
+    img = img.resize((224, 224), Image.Resampling.NEAREST)
+    img_array = np.asarray(img)
+    XTest = np.expand_dims(img_array, axis=0)  # Add batch dimension
+    XTest = np.expand_dims(XTest, axis=-1) 
+
+    res = []
+    if len(XTest.shape) == 4:
+        interpreter = tf.lite.Interpreter(model_path="modelVgg.tflite")
+        interpreter.allocate_tensors()
+
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+
+        input_data = np.array(XTest, dtype=np.float32)
+        interpreter.set_tensor(input_details[0]['index'], input_data)
+        interpreter.invoke()
+        output_data = interpreter.get_tensor(output_details[0]['index'])
+
+        index_of_max_value = np.argmax(output_data)
+
+        # Define the labels
+        name_label = [
+            'Hama Kutu Putih', 
+            'Hama Wereng', 
+            'Hama Weleng Sangit', 
+            'Hama Penggerek Batang', 
+            'Hama Tikus', 
+            'Hama Burung', 
+            'Hawar Daun', 
+            'Leaf Blast',
+            'Brown Leaf Spot', 
+            'Striped Leaf', 
+            'Tungro'
+        ]
+
+        # Get the label corresponding to the maximum value
+        predicted_label = name_label[index_of_max_value]
+        res = predicted_label
+    else:
+        res = "Terjadi Kesalahan Gambar"
+
+    return {"file_path": f'{res}'}
 
 @celery_app.task
 def track_video(location: str, unique_filename: str):

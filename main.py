@@ -1,8 +1,5 @@
 from IPython import display
-# display.clear_output()
 import ultralytics
-# ultralytics.checks()
-# obj_detection_1.mp4
 from ultralytics import YOLO
 
 import cv2

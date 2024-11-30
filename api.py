@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
-from celery_config import celery_app, track_video
+from celery_config import celery_app, track_video, track_img
 import uuid
 from fastapi.staticfiles import StaticFiles
 
@@ -29,17 +29,26 @@ UPLOAD_DIR = "/root/ultralytics/ultralytics-object-detection-paddy/files"
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
-    
     unique_filename = f"{uuid.uuid4()}_{file.filename}"
     file_location = os.path.join(UPLOAD_DIR, unique_filename)
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
     task = track_video.delay(file_location, unique_filename)
-    # task = add.delay(4, 6)
     
-    # return {"token": task.id}
     return {"token": task.id, "filename": unique_filename}
+
+@app.post("/upload/img")
+async def upload_file(file: UploadFile = File(...)):
+    unique_filename = f"{uuid.uuid4()}_{file.filename}"
+    file_location = os.path.join(UPLOAD_DIR, unique_filename)
+    with open(file_location, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    task = track_img.delay(file_location)
+    
+    return {"token": task.id, "filename": unique_filename}
+    # return {"token": "oke", "filename": unique_filename}
 
 
 @app.get("/result/{task_id}")
